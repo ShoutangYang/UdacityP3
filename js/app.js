@@ -1,33 +1,23 @@
 /**
  * Created by shoutang.yang on 2017/7/24.
  */
-
-//TODO:
-//1.初始化地图，并将其作为回调函数；
-//2.设置地图自定义样式，选择出酒店、景点、道路；
-//3.设置划线的区域；
-//4.
-
 //global
 var map;
-//TODO:1.初始化地图inital map ;2.开始 ko.applyBindings;
+//TODO:1.初始化地图中心区域为大理 ;2.执行 ko.applyBindings，view和data 开始双向绑定；
 function initMap() {
     //location dali  lat；26.54116187 lng:99.88626619
-    var uluru ={lat:25.6935,lng:100.17};
-     map = new google.maps.Map(document.getElementById('map'),{
+     var uluru ={lat:25.6935,lng:100.17};
+      map = new google.maps.Map(document.getElementById('map'),{
       zoom:8,
       center:uluru
   });
-     /*
-    var marker = new google.maps.Marker({
-        position:uluru,
-        map:map
-    });
-    */
     ko.applyBindings( new ViewModel());
 };
 
-//TODO:1.使用knockout 库，整个app采用MV-VM设计思想，将数据和视图分开;2.ViewModel
+/*1.使用knockout 库，整个app采用MV-VM设计思想，将数据和视图分开;
+  2.listView同ilterrEsult绑定，数据有变化，将在filter视图中有同步变化；
+  3.isVisible同listView是否可见绑定，实现togleVisibility控制隐藏和显示；
+ */
 var ViewModel =function () {
     var self = this;
     self.stations = ko.observableArray([]);
@@ -63,7 +53,9 @@ var ViewModel =function () {
     self.clickHandle = function () {
 
     };
-
+    /*
+    * 使用第三方接口获取检索城市的景点信息，并将景点标记在地图上
+    * */
     GetLocation=function (location) {
         //var ulr='http://route.showapi.com/268-1?showapi_appid=35746&showapi_sign=2dff955bc86547acbba133deba178401&keyword=%E5%89%91%E5%B7%9D&proId=&cityId=&areaId=&';
         var ulr ='http://route.showapi.com/268-1?showapi_appid=35746&showapi_sign=2dff955bc86547acbba133deba178401&keyword='+encodeURIComponent(location)+'&proId=&cityId=&areaId=&'
@@ -104,7 +96,9 @@ var ViewModel =function () {
         self.loadingMsg('');
     });
 };
-//TODO:1.Add marker to map,
+/*
+* 将坐标增加到地图中
+* */
 function AddMarkerToMap(marker) {
     var self =this;
     self.name= marker.name;
@@ -115,7 +109,7 @@ function AddMarkerToMap(marker) {
     console.log("value->"+Convert_BD09_To_GCJ02(self.lat,self.lng));
 
 console.log('lat；'+self.lat+' lng:'+self.lng);
-
+   //增加坐标
    self.mapMarker = new google.maps.Marker({
         position:Convert_BD09_To_GCJ02(self.lat,self.lng),//{lat:self.lat,lng:self.lng},//
         map:map,
@@ -123,7 +117,7 @@ console.log('lat；'+self.lat+' lng:'+self.lng);
         animation:google.maps.Animation.DROP,
         title:self.name
     });
-
+    //增加提示信息
     self.infoWindow = new google.maps.InfoWindow();
     self.showInfoWindow=function(){
     if(!self.infoWindow.getContent()){
@@ -134,7 +128,7 @@ console.log('lat；'+self.lat+' lng:'+self.lng);
     }
     self.infoWindow.open(map,self.mapMarker);
     };
-
+    //添加方法，采用原型链
     self.activate = function () {
         if(AddMarkerToMap.prototype.activate){
             if(AddMarkerToMap.prototype.activate!==self){
@@ -145,6 +139,7 @@ console.log('lat；'+self.lat+' lng:'+self.lng);
         self.showInfoWindow();
         AddMarkerToMap.prototype.activate=self;
     };
+    //设置坐标动作
     self.deactive=function () {
       self.mapMarker.setAnimation(null);
       self.infoWindow.close();
@@ -163,13 +158,16 @@ console.log('lat；'+self.lat+' lng:'+self.lng);
     self.infoWindowCloseHandle=function () {
         self.deactive();
     };
-
+    //设置监听事件
     self.mapMarker.addListener('click',self.mapMarkerClickHandle);
-
+    //设置监听关闭窗口的事件
     self.infoWindow.addListener('closeClick',self.infoWindowCloseHandle);
 }
 
 AddMarkerToMap.prototype.activate=null;
+/*
+* 将坐标转换为Google兼容的坐标
+* */
 function Convert_BD09_To_GCJ02(lat, lng)
 {
     var x_pi = 3.14159265358979324 * 3000.0 / 180.0;
