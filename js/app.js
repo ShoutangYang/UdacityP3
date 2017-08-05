@@ -25,7 +25,7 @@ var ViewModel =function () {
     self.loadingMsg = ko.observable('loading result...');
     self.isVisible = ko.observable(true);
 
-    self.isVisible(false);
+   // self.isVisible(false);
     self.loadingMsg("Place input search position.");
 
     self.filterResult =ko.computed(function () {
@@ -43,7 +43,7 @@ var ViewModel =function () {
                 }
             }
         });
-        console.log(matches);
+
         return matches;
     });
 
@@ -72,20 +72,19 @@ var ViewModel =function () {
                     bounds.extend(station.mapMarker.position);
                })
 
-               console.log(stations);
-               console.log(location);
+
                self.stations(stations);
                map.fitBounds(bounds);
             }).fail(function() {
                self.loadingMsg('Unable to load data... try refreshing');
-               console.log('ERROR: Could not acquire subway station data');
+
            });
     };
    // GetLocation('大理');
     document.getElementById('search').addEventListener('click', function () {
         console.log('in here');
         console.log("the search->"+document.getElementById('position').value);
-        console.log(map);
+
         var uluru ={lat:25.6935,lng:100.17};
         map = new google.maps.Map(document.getElementById('map'),{
             zoom:8,
@@ -182,4 +181,9 @@ function Convert_BD09_To_GCJ02(lat, lng)
     location.lng=lng;
     console.log(lng.toString() +"   " +lat.toString());
     return location;
-}
+};
+
+var mapErrorHandle = function () {
+    console.log('map has error!');
+    document.getElementById('toggle').innerText='Please,refresh.Google map had error. ';
+};
